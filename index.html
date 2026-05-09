@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPsych: Early Childhood Practice Test</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #8E8E93;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .progress-header { margin-bottom: 30px; }
+        .progress-container {
+            height: 8px;
+            background: #E5E5EA;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--ios-blue);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .meta-info {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 { font-size: 20px; line-height: 1.4; color: var(--text-main); margin-top: 10px; }
+
+        .options-list { margin-top: 25px; }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 1.5px solid #E5E5EA;
+            border-radius: 16px;
+            background: white;
+            text-align: left;
+            font-size: 16px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { border-color: var(--ios-blue); background: #F9F9FB; }
+        .option-btn:active { transform: scale(0.98); background: #F2F2F7; }
+
+        .result-screen { text-align: center; display: none; }
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .pass { background: var(--ios-green); }
+        .fail { background: var(--ios-red); }
+        
+        .status-text { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .detail-text { color: var(--text-secondary); margin-bottom: 30px; }
+
+        .btn-retry {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .summary-table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+        .summary-table th { color: var(--text-secondary); padding: 10px; border-bottom: 1px solid #E5E5EA; }
+        .summary-table td { padding: 12px 10px; border-bottom: 1px solid #F2F2F7; }
+        .res-correct { color: var(--ios-green); font-weight: bold; }
+        .res-wrong { color: var(--ios-red); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="quiz-view">
+        <div class="progress-header">
+            <div class="progress-container"><div id="progress-bar"></div></div>
+            <div id="meta-text" class="meta-info">Question 1 of 50</div>
+        </div>
+        <h2 id="question-text">Question loading...</h2>
+        <div id="options-container" class="options-list"></div>
+    </div>
+
+    <div id="result-view" class="result-screen">
+        <div id="score-ring" class="score-circle">0%</div>
+        <div id="status-label" class="status-text">Result</div>
+        <p id="score-text" class="detail-text"></p>
+        <button class="btn-retry" onclick="resetQuiz()">Take it Again</button>
+        
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Status</th>
+                    <th>Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody id="summary-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "A 4-year-old insists that the moon “followed” their family’s car all the way home... child responds, “Yes it is, because it keeps watching us.”", a: ["Egocentrism", "Conservation", "Animism", "Centration"], c: 2 },
+        { q: "After one row of coins is spread farther apart, the child says that the longer row now has more coins. This error is related to:", a: ["Irreversibility", "Centration on spatial arrangement", "Egocentric failure", "Incomplete symbolic representation"], c: 1 },
+        { q: "A 5-year-old repeatedly asks “Why?” questions about death, birds, and rain. This is characteristic of:", a: ["Symbolic function substage", "Sensorimotor experimentation", "Intuitive thought substage", "Formal operational reasoning"], c: 2 },
+        { q: "A child can complete a puzzle only with occasional hints from an older classmate. This illustrates:", a: ["Social referencing", "Zone of proximal development", "Executive inhibition", "Reciprocal determinism"], c: 1 },
+        { q: "A teacher initially demonstrates shoelace tying and gradually reduces assistance. This represents:", a: ["Shaping", "Scaffolding", "Guided participation", "Distributed cognition"], c: 1 },
+        { q: "A 3-year-old covers their eyes during hide-and-seek and states, “You can’t see me now.” This is:", a: ["Animistic thinking", "Symbolic reasoning", "Egocentrism", "Deferred imitation"], c: 2 },
+        { q: "A child whispers to herself while building blocks. According to Vygotsky, this is:", a: ["Cognitive immaturity", "Self-guiding private speech", "Delayed language internalization", "Echolalia"], c: 1 },
+        { q: "A child insists there is “more clay” after it is rolled into a long shape. The child has NOT yet developed:", a: ["Decentration", "Reversibility", "Object permanence", "Symbolic substitution"], c: 0 },
+        { q: "A child who once struggled can now run, jump, and climb easily. This reflects:", a: ["Executive functioning", "Gross motor coordination", "Visual accommodation", "Fine motor integration"], c: 1 },
+        { q: "Difficulty stacking and aligning blocks precisely most likely reflects limitations in:", a: ["Vestibular adaptation", "Fine motor coordination", "Gross motor maturation", "Symbolic representation"], c: 1 },
+        { q: "A 5-year-old can now visually track words smoothly. This is associated with:", a: ["Reticular activation", "Ocular muscle control", "Executive retrieval systems", "Peripheral depth perception"], c: 1 },
+        { q: "Falling asleep abruptly during conversations strongly suggests:", a: ["Somnambulism", "Insomnia", "Narcolepsy", "Night terrors"], c: 2 },
+        { q: "Persistent difficulty initiating and maintaining sleep results in fatigue. This is:", a: ["Narcolepsy", "Parasomnia", "Circadian regression", "Insomnia"], c: 3 },
+        { q: "Slow growth stemming from inadequate secretion by the pituitary gland is most likely:", a: ["Thyroid insufficiency", "Growth hormone deficiency", "Cortisol dysregulation", "Pineal gland dysfunction"], c: 1 },
+        { q: "The process of neural pathways becoming insulated by fatty coverings is:", a: ["Synaptic pruning", "Myelination", "Neuroplasticity", "Lateralization"], c: 1 },
+        { q: "Accurately recalling specific details from a birthday three years ago illustrates:", a: ["Working memory", "Sensory memory", "Long-term memory", "Procedural encoding"], c: 2 },
+        { q: "Mentally rehearsing a phone number just long enough to dial it represents:", a: ["Long-term retrieval", "Episodic encoding", "Short-term memory", "Semantic consolidation"], c: 2 },
+        { q: "Resisting a marshmallow by singing and looking away is a:", a: ["Hot cognition strategy", "Cool thought strategy", "Delayed symbolic substitution", "Emotional displacement"], c: 1 },
+        { q: "Imagining how good a marshmallow tastes before eating it immediately reflects:", a: ["Cool cognition", "Metacognitive rehearsal", "Hot thought processing", "Executive abstraction"], c: 2 },
+        { q: "Hands-on exploration and choosing activities freely based on interest describes:", a: ["Child-centered education", "Montessori education", "Behavioral instructionism", "Direct cognitive training"], c: 1 },
+        { q: "A curriculum designed around emotional, cognitive, and social needs rather than drills is:", a: ["Constructivist conditioning", "Child-centered kindergarten", "Formal operational instruction", "Programmed learning"], c: 1 },
+        { q: "Vygotsky believed children acquire knowledge most effectively through:", a: ["Independent discovery", "Biological maturation", "Social interaction within cultural contexts", "Reinforcement schedules"], c: 2 },
+        { q: "Believing juice amount increases when poured into a taller glass reflects failure in:", a: ["Symbolic reasoning", "Conservation", "Object permanence", "Abstract categorization"], c: 1 },
+        { q: "Using a cardboard box as a “spaceship” demonstrates:", a: ["Symbolic function", "Conservation mastery", "Concrete operational logic", "Reciprocal social cognition"], c: 0 },
+        { q: "Learning occurring through guided social experiences and collaboration is the view of:", a: ["Piaget", "Vygotsky (social constructivist)", "Skinner", "Bandura"], c: 1 },
+        { q: "Insisting a rock-painted sponge is a real rock reflects limitations in:", a: ["Appearance-reality distinction", "Conservation reasoning", "Deferred imitation", "Hierarchical classification"], c: 0 },
+        { q: "Secondhand smoke exposure causes respiratory problems. This factor is:", a: ["Passive pulmonary adaptation", "Environmental tobacco smoke", "Respiratory deprivation syndrome", "Neuroendocrine sensitization"], c: 1 },
+        { q: "Focusing only on liquid height while ignoring width is:", a: ["Irreversibility", "Conservation bias", "Centration", "Egocentric fixation"], c: 2 },
+        { q: "Preschool cognition characterized by intuitive judgments rather than logical operations is the:", a: ["Sensorimotor stage", "Concrete operational stage", "Formal operational stage", "Preoperational stage"], c: 3 },
+        { q: "Better performance working with a skilled peer supports the theories of:", a: ["Jean Piaget", "Lev Vygotsky", "Erik Erikson", "Lawrence Kohlberg"], c: 1 },
+        { q: "Saying a doll became “sad” after being left alone is:", a: ["Symbolic displacement", "Egocentric projection", "Animistic reasoning", "Artificialism"], c: 2 },
+        { q: "Remembering how to ride a tricycle months later is explained by:", a: ["Short-term retention", "Sensory storage", "Long-term memory consolidation", "Immediate recall capacity"], c: 2 },
+        { q: "Imagining a gift as “just a cardboard box” to resist opening it reflects:", a: ["Emotional suppression", "Executive punishment", "Cool thought transformation", "Symbolic conservation"], c: 2 },
+        { q: "Children learning counting faster in cooperative small groups supports:", a: ["Behavioral conditioning", "Psychoanalytic learning", "Social constructivism", "Maturational theory"], c: 2 },
+        { q: "Performing a task alone next week after repeated guidance today is:", a: ["Deferred reinforcement", "Internalization through scaffolding", "Reciprocal inhibition", "Behavioral extinction"], c: 1 },
+        { q: "Insisting a taller person must automatically be older reflects:", a: ["Decentration", "Conservation", "Centrated reasoning", "Formal operational logic"], c: 2 },
+        { q: "Talking aloud during a puzzle but stopping as mastery improves shows speech becoming:", a: ["Echolalic repetition", "Social reinforcement", "External conditioning", "Internalized thought"], c: 3 },
+        { q: "Choosing between painting, puzzles, and reading corners reflects the philosophy of:", a: ["Piaget", "Behavioral task sequencing", "Maria Montessori", "Direct instructional learning"], c: 2 },
+        { q: "Frustration because another child doesn't understand unstated rules reflects limitations in:", a: ["Conservation ability", "Executive control", "Perspective-taking ability", "Symbolic representation"], c: 2 },
+        { q: "Storing information briefly while solving a mental math problem involves:", a: ["Episodic memory", "Procedural memory", "Long-term memory", "Short-term memory"], c: 3 },
+        { q: "Preschoolers thinking through mental images and pretend play shows the emergence of:", a: ["Concrete reversibility", "Symbolic function", "Abstract deduction", "Metacognitive control"], c: 1 },
+        { q: "Assuming everyone likes the same snack because you do illustrates:", a: ["Animism", "Conservation failure", "Egocentric thought", "Reversible reasoning"], c: 2 },
+        { q: "Increasing ability to coordinate movement smoothly is associated with:", a: ["Synaptic elimination", "Neural extinction", "Cortical specialization", "Myelination"], c: 3 },
+        { q: "Interactive classrooms demonstrating stronger language development supports:", a: ["Nativist theory", "Behaviorist reinforcement", "Vygotsky’s sociocultural theory", "Ethological theory"], c: 2 },
+        { q: "Thinking crackers spread apart means there are “more” crackers is a failure in:", a: ["Object permanence", "Reversibility", "Symbolic representation", "Conservation of quantity"], c: 3 },
+        { q: "Adjusting task difficulty so students can succeed with assistance is:", a: ["Reciprocal determinism", "Operant shaping", "Zone of proximal development", "Classical conditioning"], c: 2 },
+        { q: "Diets high in saturated and trans fats may increase later risk for:", a: ["Visual processing deficits", "Hormonal hypersecretion", "Cardiovascular disease", "Symbolic reasoning impairment"], c: 2 },
+        { q: "Running confidently without concentrating on balance reflects maturation in:", a: ["Fine motor precision", "Gross motor automaticity", "Symbolic processing", "Conservation ability"], c: 1 },
+        { q: "Performing a task silently after previously needing verbal guidance reflects:", a: ["Extinction of verbal behavior", "Delayed egocentrism", "External reinforcement", "Internalization of cognitive processes"], c: 3 },
+        { q: "The theorist associated with collaborative dialogue and cultural interaction is:", a: ["Jean Piaget", "Sigmund Freud", "B.F. Skinner", "Lev Vygotsky"], c: 3 }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let userRecord = [];
+
+    function initQuiz() {
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestion];
+        document.getElementById("meta-text").innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
+        document.getElementById("question-text").innerText = q.q;
+        
+        const container = document.getElementById("options-container");
+        container.innerHTML = "";
+        
+        q.a.forEach((option, index) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = option;
+            btn.onclick = () => selectAnswer(index);
+            container.appendChild(btn);
+        });
+
+        const progress = ((currentQuestion) / questions.length) * 100;
+        document.getElementById("progress-bar").style.width = `${progress}%`;
+    }
+
+    function selectAnswer(index) {
+        const correct = questions[currentQuestion].c;
+        const isCorrect = (index === correct);
+        
+        if (isCorrect) score++;
+        userRecord.push({ isCorrect, correctLabel: questions[currentQuestion].a[correct] });
+
+        currentQuestion++;
+
+        if (currentQuestion < questions.length) {
+            renderQuestion();
+        } else {
+            showFinalResults();
+        }
+    }
+
+    function showFinalResults() {
+        document.getElementById("quiz-view").style.display = "none";
+        document.getElementById("result-view").style.display = "block";
+        
+        const percentage = Math.round((score / questions.length) * 100);
+        const ring = document.getElementById("score-ring");
+        const status = document.getElementById("status-label");
+        
+        ring.innerText = `${percentage}%`;
+        document.getElementById("score-text").innerText = `You correctly answered ${score} out of ${questions.length} questions.`;
+
+        if (percentage >= 75) {
+            ring.className = "score-circle pass";
+            status.innerText = "Passed!";
+            status.style.color = "var(--ios-green)";
+        } else {
+            ring.className = "score-circle fail";
+            status.innerText = "Needs Review";
+            status.style.color = "var(--ios-red)";
+        }
+
+        const tableBody = document.getElementById("summary-body");
+        tableBody.innerHTML = "";
+        userRecord.forEach((res, i) => {
+            const row = `<tr>
+                <td>${i+1}</td>
+                <td class="${res.isCorrect ? 'res-correct' : 'res-wrong'}">${res.isCorrect ? '✓' : '✗'}</td>
+                <td>${res.correctLabel}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function resetQuiz() {
+        currentQuestion = 0;
+        score = 0;
+        userRecord = [];
+        document.getElementById("quiz-view").style.display = "block";
+        document.getElementById("result-view").style.display = "none";
+        renderQuestion();
+    }
+
+    initQuiz();
+</script>
+</body>
+</html>
